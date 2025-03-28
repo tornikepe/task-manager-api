@@ -1,22 +1,27 @@
+// Import required modules
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Task = require("./taskSchema");
 
+/**
+ * Define the schema for a User.
+ * Each user has a name, email, password, age, authentication tokens, and an optional avatar.
+ */
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
-      trim: true, // Removes extra spaces
+      required: true, // Name is mandatory
+      trim: true, // Removes leading and trailing spaces
     },
     email: {
       type: String,
-      unique: true,
-      require: true,
+      unique: true, // Email must be unique
+      required: true,
       trim: true,
-      lowercase: true,
+      lowercase: true, // Ensures email is stored in lowercase
       validate(value) {
         if (!validator.isEmail(value)) {
           throw new Error("Email is invalid");
@@ -25,12 +30,12 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: true, // Password is mandatory
       trim: true,
-      minLength: 7,
+      minLength: 7, // Minimum password length
       validate(value) {
         if (value.toLowerCase().includes("password")) {
-          throw new Error("not this password");
+          throw new Error("Password cannot contain the word 'password'.");
         }
       },
     },
@@ -39,7 +44,7 @@ const userSchema = new mongoose.Schema(
       min: 0, // Ensures age is not negative
       validate(value) {
         if (value < 0) {
-          throw new Error("Age must be a positive number");
+          throw new Error("Age must be a positive number.");
         }
       },
     },
@@ -52,22 +57,28 @@ const userSchema = new mongoose.Schema(
       },
     ],
     avatar: {
-      type: Buffer,
+      type: Buffer, // Stores the user's profile picture as binary data
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 
-//
+/**
+ * Virtual relationship between User and Task.
+ * This allows querying tasks associated with a user.
+ */
 userSchema.virtual("tasks", {
   ref: "Task",
   localField: "_id",
   foreignField: "owner",
 });
 
-//  Hiding private data
+/**
+ * Removes sensitive user data before returning a response.
+ * Hides the password, tokens, and avatar when sending user data.
+ */
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
@@ -79,7 +90,10 @@ userSchema.methods.toJSON = function () {
   return userObject;
 };
 
-//  JWT
+/**
+ * Generates an authentication token for the user.
+ * Uses JWT (JSON Web Token) for authentication.
+ */
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
@@ -90,22 +104,29 @@ userSchema.methods.generateAuthToken = async function () {
   return token;
 };
 
-//  User Login
+/**
+ * Finds a user by email and password for login authentication.
+ * If credentials are incorrect, an error is thrown.
+ */
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new Error("Unable to login");
+    throw new Error("Unable to login.");
   }
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error("Unable to login");
+    throw new Error("Unable to login.");
   }
 
   return user;
 };
 
-//  Hash the plain text password before saving
+/**
+ * Hashes the user's password before saving it to the database.
+ * Ensures passwords are stored securely.
+ */
 userSchema.pre("save", async function (next) {
   const user = this;
 
@@ -116,7 +137,9 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-//  Delete user task when user is removed
+/**
+ * Deletes all tasks associated with a user when the user is removed.
+ */
 userSchema.pre(
   "deleteOne",
   { document: true, query: false },
@@ -127,6 +150,7 @@ userSchema.pre(
   }
 );
 
+// Create a User model using the schema
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
