@@ -85,6 +85,75 @@ To run tests, use:
 npm test
 ```
 
-## License
-This project is licensed under the MIT License.
+### Step 2: Install dependencies
+
+bash
+
+CopyEdit
+
+`npm install`
+
+### Step 3: Start the app
+
+To start the application in development mode (with hot-reloading):
+
+bash
+
+CopyEdit
+
+`npm run dev`
+
+Alternatively, to run the application in production mode:
+
+bash
+
+CopyEdit
+
+`npm start`
+
+The app will be running on `http://localhost:3000`.
+
+Usage
+-----
+
+-   Open `http://localhost:3000` in your browser.
+
+-   Enter your username and the room you want to join.
+
+-   Start chatting, share locations, and see updates as other users join or leave the room.
+
+Project Structure
+-----------------
+
+plaintext
+
+CopyEdit
+
+`chat-app/
+│
+├── public/                   # Static files (HTML, CSS, JS)
+│   ├── index.html            # Main HTML file
+│   ├── chat.js               # Client-side JavaScript (handles chat functionality)
+│   ├── style.css             # Styles for the app
+│   └── templates/            # Mustache templates
+│
+├── src/                      # Server-side code
+│   ├── index.js              # Main entry point of the server
+│   ├── utils/                # Utility functions
+│   │   ├── messages.js       # Functions to generate messages
+│   │   └── users.js          # Functions to manage users in chat rooms
+│   └── package.json          # Project dependencies and scripts
+│
+└── README.md                 # Project documentation (this file)`
+
+Contributing
+------------
+
+If you'd like to contribute to this project, feel free to fork the repository and submit pull requests. Here are a few ways you can help:
+
+-   Fix bugs or enhance existing features.
+
+-   Add new features like file sharing, group chats, or user authentication.
+
+-   Improve documentation.
 
